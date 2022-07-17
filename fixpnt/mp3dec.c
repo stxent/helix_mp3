@@ -216,14 +216,14 @@ void MP3GetLastFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo)
  *
  * Return:      error code, defined in mp3dec.h (0 means no error, < 0 means error)
  **************************************************************************************/
-int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, unsigned char *buf)
+int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, unsigned char *buf, int bytesLeft)
 {
 	MP3DecInfo *mp3DecInfo = (MP3DecInfo *)hMP3Decoder;
 
 	if (!mp3DecInfo)
 		return ERR_MP3_NULL_POINTER;
 
-	if (UnpackFrameHeader(mp3DecInfo, buf) == -1 || mp3DecInfo->layer != 3)
+	if (UnpackFrameHeader(mp3DecInfo, buf, bytesLeft) == -1 || mp3DecInfo->layer != 3)
 		return ERR_MP3_INVALID_FRAMEHEADER;
 
 	MP3GetLastFrameInfo(mp3DecInfo, mp3FrameInfo);
@@ -263,6 +263,7 @@ static void MP3ClearBadFrame(MP3DecInfo *mp3DecInfo, short *outbuf)
  *              double pointer to buffer of MP3 data (containing headers + mainData)
  *              number of valid bytes remaining in inbuf
  *              pointer to outbuf, big enough to hold one frame of decoded PCM samples
+ *              number of available samples in outbuf
  *              flag indicating whether MP3 data is normal MPEG format (useSize = 0)
  *                or reformatted as "self-contained" frames (useSize = 1)
  *
@@ -275,7 +276,7 @@ static void MP3ClearBadFrame(MP3DecInfo *mp3DecInfo, short *outbuf)
  * Notes:       switching useSize on and off between frames in the same stream 
  *                is not supported (bit reservoir is not maintained if useSize on)
  **************************************************************************************/
-int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, short *outbuf, int useSize)
+int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, short *outbuf, int samplesLeft, int useSize)
 {
 	int offset, bitOffset, mainBits, gr, ch, fhBytes, siBytes, freeFrameBytes;
 	int prevBitOffset, sfBlockBits, huffBlockBits;
@@ -286,20 +287,27 @@ int MP3Decode(HMP3Decoder hMP3Decoder, unsigned char **inbuf, int *bytesLeft, sh
 		return ERR_MP3_NULL_POINTER;
 
 	/* unpack frame header */
-	fhBytes = UnpackFrameHeader(mp3DecInfo, *inbuf);
-	if (fhBytes < 0)	
-		return ERR_MP3_INVALID_FRAMEHEADER;		/* don't clear outbuf since we don't know size (failed to parse header) */
+	fhBytes = UnpackFrameHeader(mp3DecInfo, *inbuf, *bytesLeft);
+	if (fhBytes < 0) {
+		/* don't clear outbuf since we don't know size (failed to parse header) */
+		return ERR_MP3_INVALID_FRAMEHEADER;
+	}
 	*inbuf += fhBytes;
-	
+	*bytesLeft -= fhBytes;
+
+	/* validate output buffer size */
+	if (samplesLeft < mp3DecInfo->nGrans * mp3DecInfo->nGranSamps * mp3DecInfo->nChans)
+		return ERR_MP3_OUT_OF_MEMORY;
+
 	/* unpack side info */
-	siBytes = UnpackSideInfo(mp3DecInfo, *inbuf);
+	siBytes = UnpackSideInfo(mp3DecInfo, *inbuf, *bytesLeft);
 	if (siBytes < 0) {
 		MP3ClearBadFrame(mp3DecInfo, outbuf);
 		return ERR_MP3_INVALID_SIDEINFO;
 	}
 	*inbuf += siBytes;
-	*bytesLeft -= (fhBytes + siBytes);
-	
+	*bytesLeft -= siBytes;
+
 	/* if free mode, need to calculate bitrate and nSlots manually, based on frame size */
 	if (mp3DecInfo->bitrate == 0 || mp3DecInfo->freeBitrateFlag) {
 		if (!mp3DecInfo->freeBitrateFlag) {

@@ -215,11 +215,15 @@ int CheckPadBit(MP3DecInfo *mp3DecInfo)
  * TODO:        check for valid modes, depending on capabilities of decoder
  *              test CRC on actual stream (verify no endian problems)
  **************************************************************************************/
-int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, unsigned char *buf)
+int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, unsigned char *buf, int bytesLeft)
 {
 
 	int verIdx;
 	FrameHeader *fh;
+
+	/* validate buffer length */
+	if (bytesLeft < 4)
+		return -1;
 
 	/* validate pointers and sync word */
 	if (!mp3DecInfo || !mp3DecInfo->FrameHeaderPS || (buf[0] & SYNCWORDH) != SYNCWORDH || (buf[1] & SYNCWORDL) != SYNCWORDL)
@@ -274,6 +278,10 @@ int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, unsigned char *buf)
 
 	/* load crc word, if enabled, and return length of frame header (in bytes) */
 	if (fh->crc) {
+		/* validate buffer length */
+		if (bytesLeft < 6)
+			return -1;
+
 		fh->CRCWord = ((int)buf[4] << 8 | (int)buf[5] << 0);
 		return 6;
 	} else {
@@ -296,7 +304,7 @@ int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, unsigned char *buf)
  * Return:      length (in bytes) of side info data
  *              -1 if null input pointers
  **************************************************************************************/
-int UnpackSideInfo(MP3DecInfo *mp3DecInfo, unsigned char *buf)
+int UnpackSideInfo(MP3DecInfo *mp3DecInfo, unsigned char *buf, int bytesLeft)
 {
 	int gr, ch, bd, nBytes;
 	BitStreamInfo bitStreamInfo, *bsi;
@@ -315,6 +323,10 @@ int UnpackSideInfo(MP3DecInfo *mp3DecInfo, unsigned char *buf)
 	if (fh->ver == MPEG1) {
 		/* MPEG 1 */
 		nBytes = (fh->sMode == Mono ? SIBYTES_MPEG1_MONO : SIBYTES_MPEG1_STEREO);
+		/* validate buffer length */
+		if (bytesLeft < nBytes)
+			return -1;
+
 		SetBitstreamPointer(bsi, nBytes, buf);
 		si->mainDataBegin = GetBits(bsi, 9);
 		si->privateBits =   GetBits(bsi, (fh->sMode == Mono ? 5 : 3));
@@ -325,6 +337,10 @@ int UnpackSideInfo(MP3DecInfo *mp3DecInfo, unsigned char *buf)
 	} else {
 		/* MPEG 2, MPEG 2.5 */
 		nBytes = (fh->sMode == Mono ? SIBYTES_MPEG2_MONO : SIBYTES_MPEG2_STEREO);
+		/* validate buffer length */
+		if (bytesLeft < nBytes)
+			return -1;
+
 		SetBitstreamPointer(bsi, nBytes, buf);
 		si->mainDataBegin = GetBits(bsi, 8);
 		si->privateBits =   GetBits(bsi, (fh->sMode == Mono ? 1 : 2));
