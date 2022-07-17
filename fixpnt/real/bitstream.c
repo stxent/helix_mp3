@@ -330,7 +330,7 @@ int UnpackSideInfo(MP3DecInfo *mp3DecInfo, unsigned char *buf)
 		si->privateBits =   GetBits(bsi, (fh->sMode == Mono ? 1 : 2));
 	}
 
-	for(gr =0; gr < mp3DecInfo->nGrans; gr++) {
+	for(gr = 0; gr < mp3DecInfo->nGrans; gr++) {
 		for (ch = 0; ch < mp3DecInfo->nChans; ch++) {
 			sis = &si->sis[gr][ch];						/* side info subblock for this granule, channel */
 

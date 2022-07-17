@@ -106,6 +106,9 @@ void MidSideProc(int x[MAX_NCHAN][MAX_NSAMP], int nSamps, int mOut[2])
 void IntensityProcMPEG1(int x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis, 
 						CriticalBandInfo *cbi, int midSideFlag, int mixFlag, int mOut[2])
 {
+	/* suppress warning */
+	(void)mixFlag;
+
 	int i=0, j=0, n=0, cb=0, w=0;
 	int sampsLeft, isf, mOutL, mOutR, xl, xr;
 	int fl, fr, fls[3], frs[3];
@@ -212,6 +215,9 @@ void IntensityProcMPEG1(int x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh
 void IntensityProcMPEG2(int x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis, 
 						CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int midSideFlag, int mixFlag, int mOut[2])
 {
+	/* suppress warning */
+	(void)mixFlag;
+
 	int i, j, k, n, r, cb, w;
 	int fl, fr, mOutL, mOutR, xl, xr;
 	int sampsLeft;

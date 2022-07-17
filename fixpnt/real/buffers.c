@@ -208,5 +208,8 @@ void FreeBuffers(MP3DecInfo *mp3DecInfoArg)
 	SAFE_FREE(mp3DecInfoArg->SubbandInfoPS);
 
 	SAFE_FREE(mp3DecInfoArg);
+#else
+	/* suppress warning */
+	(void)mp3DecInfoArg;
 #endif
 }
