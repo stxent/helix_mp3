@@ -45,7 +45,9 @@
  *  the only file you'll need to change.
  **************************************************************************************/
 
-#define USE_STATIC      1
+#ifndef USE_STATIC
+#define USE_STATIC 1
+#endif
 
 #include "coder.h"
 
