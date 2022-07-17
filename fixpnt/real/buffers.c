@@ -1,37 +1,37 @@
-/* ***** BEGIN LICENSE BLOCK ***** 
- * Version: RCSL 1.0/RPSL 1.0 
- *  
- * Portions Copyright (c) 1995-2002 RealNetworks, Inc. All Rights Reserved. 
- *      
- * The contents of this file, and the files included with this file, are 
- * subject to the current version of the RealNetworks Public Source License 
- * Version 1.0 (the "RPSL") available at 
- * http://www.helixcommunity.org/content/rpsl unless you have licensed 
- * the file under the RealNetworks Community Source License Version 1.0 
- * (the "RCSL") available at http://www.helixcommunity.org/content/rcsl, 
- * in which case the RCSL will apply. You may also obtain the license terms 
- * directly from RealNetworks.  You may not use this file except in 
- * compliance with the RPSL or, if you have a valid RCSL with RealNetworks 
- * applicable to this file, the RCSL.  Please see the applicable RPSL or 
- * RCSL for the rights, obligations and limitations governing use of the 
- * contents of the file.  
- *  
- * This file is part of the Helix DNA Technology. RealNetworks is the 
- * developer of the Original Code and owns the copyrights in the portions 
- * it created. 
- *  
- * This file, and the files included with this file, is distributed and made 
- * available on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER 
- * EXPRESS OR IMPLIED, AND REALNETWORKS HEREBY DISCLAIMS ALL SUCH WARRANTIES, 
- * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS 
- * FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT. 
- * 
- * Technology Compatibility Kit Test Suite(s) Location: 
- *    http://www.helixcommunity.org/content/tck 
- * 
- * Contributor(s): 
- *  
- * ***** END LICENSE BLOCK ***** */ 
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: RCSL 1.0/RPSL 1.0
+ *
+ * Portions Copyright (c) 1995-2002 RealNetworks, Inc. All Rights Reserved.
+ *
+ * The contents of this file, and the files included with this file, are
+ * subject to the current version of the RealNetworks Public Source License
+ * Version 1.0 (the "RPSL") available at
+ * http://www.helixcommunity.org/content/rpsl unless you have licensed
+ * the file under the RealNetworks Community Source License Version 1.0
+ * (the "RCSL") available at http://www.helixcommunity.org/content/rcsl,
+ * in which case the RCSL will apply. You may also obtain the license terms
+ * directly from RealNetworks.  You may not use this file except in
+ * compliance with the RPSL or, if you have a valid RCSL with RealNetworks
+ * applicable to this file, the RCSL.  Please see the applicable RPSL or
+ * RCSL for the rights, obligations and limitations governing use of the
+ * contents of the file.
+ *
+ * This file is part of the Helix DNA Technology. RealNetworks is the
+ * developer of the Original Code and owns the copyrights in the portions
+ * it created.
+ *
+ * This file, and the files included with this file, is distributed and made
+ * available on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+ * EXPRESS OR IMPLIED, AND REALNETWORKS HEREBY DISCLAIMS ALL SUCH WARRANTIES,
+ * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
+ *
+ * Technology Compatibility Kit Test Suite(s) Location:
+ *    http://www.helixcommunity.org/content/tck
+ *
+ * Contributor(s):
+ *
+ * ***** END LICENSE BLOCK ***** */
 
 /**************************************************************************************
  * Fixed-point MP3 decoder
@@ -40,8 +40,8 @@
  *
  * buffers.c - allocation and freeing of internal MP3 decoder buffers
  *
- * All memory allocation for the codec is done in this file, so if you don't want 
- *  to use other the default system malloc() and free() for heap management this is 
+ * All memory allocation for the codec is done in this file, so if you don't want
+ *  to use other the default system malloc() and free() for heap management this is
  *  the only file you'll need to change.
  **************************************************************************************/
 
@@ -52,7 +52,7 @@
 #include "coder.h"
 
 #if USE_STATIC
-MP3DecInfo mp3DecInfo; 
+MP3DecInfo mp3DecInfo;
 SubbandInfo sbi;
 IMDCTInfo mi;
 HuffmanInfo hi;
@@ -61,7 +61,7 @@ ScaleFactorInfo sfi;
 SideInfo si;
 FrameHeader fh;
 #else
-#include "stdlib.h" 
+#include "stdlib.h"
 #endif
 
 /**************************************************************************************
@@ -98,8 +98,8 @@ static void ClearBuffer(void *buf, int nBytes)
  *
  * Outputs:     none
  *
- * Return:      pointer to MP3DecInfo structure (initialized with pointers to all 
- *                the internal buffers needed for decoding, all other members of 
+ * Return:      pointer to MP3DecInfo structure (initialized with pointers to all
+ *                the internal buffers needed for decoding, all other members of
  *                MP3DecInfo structure set to 0)
  *
  * Notes:       if one or more mallocs fail, function frees any buffers already
@@ -143,7 +143,7 @@ MP3DecInfo *AllocateBuffers(void)
 	if (!mp3DecInfo)
 		return 0;
 	ClearBuffer(mp3DecInfo, sizeof(MP3DecInfo));
-	
+
 	fh =  (FrameHeader *)     malloc(sizeof(FrameHeader));
 	si =  (SideInfo *)        malloc(sizeof(SideInfo));
 	sfi = (ScaleFactorInfo *) malloc(sizeof(ScaleFactorInfo));
@@ -164,7 +164,7 @@ MP3DecInfo *AllocateBuffers(void)
 		FreeBuffers(mp3DecInfo);	/* safe to call - only frees memory that was successfully allocated */
 		return 0;
 	}
-        
+
 	/* important to do this - DSP primitives assume a bunch of state variables are 0 on first use */
 	ClearBuffer(fh,  sizeof(FrameHeader));
 	ClearBuffer(si,  sizeof(SideInfo));
