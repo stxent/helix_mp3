@@ -84,10 +84,10 @@ static __inline short ClipToShort(int x, int fracBits)
 }
 
 #define MC2M(x)	{ \
-		c1 = *coef;		coef++;		c2 = *coef;		coef++; \
-		vLo = *(vb1+(x));	vHi = *(vb1+(23-(x))); \
-		sum1L = MADD64(sum1L, vLo,  c1);	sum2L = MADD64(sum2L, vLo,  c2); \
-		sum1L = MADD64(sum1L, vHi, -c2);	sum2L = MADD64(sum2L, vHi,  c1); \
+	c1 = *coef;		coef++;		c2 = *coef;		coef++; \
+	vLo = *(vb1+(x));	vHi = *(vb1+(23-(x))); \
+	sum1L = MADD64(sum1L, vLo,  c1);	sum2L = MADD64(sum2L, vLo,  c2); \
+	sum1L = MADD64(sum1L, vHi, -c2);	sum2L = MADD64(sum2L, vHi,  c1); \
 }
 
 /**************************************************************************************

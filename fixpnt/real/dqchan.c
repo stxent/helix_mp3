@@ -177,22 +177,18 @@ static int DequantBlock(int *inbuf, int *outbuf, int num, int scale)
 
 				/* normalize to [0x40000000, 0x7fffffff] */
 				x <<= 17;
-				shift = 0;
-				if (x < 0x08000000)
-					x <<= 4, shift += 4;
-				if (x < 0x20000000)
-					x <<= 2, shift += 2;
-				if (x < 0x40000000)
-					x <<= 1, shift += 1;
+
+				shift = CLZ(x) - 1;
+				x <<= shift;
 
 				coef = (x < SQRTHALF) ? poly43lo : poly43hi;
 
 				/* polynomial */
 				y = coef[0];
-				y = MULSHIFT32(y, x) + coef[1];
-				y = MULSHIFT32(y, x) + coef[2];
-				y = MULSHIFT32(y, x) + coef[3];
-				y = MULSHIFT32(y, x) + coef[4];
+				y = MADD32(coef[1], y, x);
+				y = MADD32(coef[2], y, x);
+				y = MADD32(coef[3], y, x);
+				y = MADD32(coef[4], y, x);
 				y = MULSHIFT32(y, pow2frac[shift]) << 3;
 
 				/* fractional scale */

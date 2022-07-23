@@ -48,19 +48,141 @@
  * MULSHIFT32(x, y)    signed multiply of two 32-bit integers (x and y), returns top 32 bits of 64-bit result
  * FASTABS(x)          branchless absolute value of signed integer x
  * CLZ(x)              count leading zeros in x
- * MADD64(sum, x, y)   (Windows only) sum [64-bit] += x [32-bit] * y [32-bit]
- * SHL64(sum, x, y)    (Windows only) 64-bit left shift using __int64
- * SAR64(sum, x, y)    (Windows only) 64-bit right shift using __int64
+ * MADD32(sum, x, y)   sum [32-bit] += x [32-bit] * y [32-bit] >> 32
+ * MSUB32(sum, x, y)   sum [32-bit] -= x [32-bit] * y [32-bit] >> 32
+ * MADD64(sum, x, y)   sum [64-bit] += x [32-bit] * y [32-bit]
+ * SAR64(sum, x, y)    64-bit right shift using __int64
  */
 
 #ifndef _ASSEMBLY_H
 #define _ASSEMBLY_H
 
+#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+
+/* ARM Cortex M3 and M4 */
+
+/* 64-bit signed integer */
+typedef long long int64_t;
+/* 32-bit unsigned integer */
+typedef unsigned int uint32_t;
+/* 64-bit unsigned integer */
+typedef unsigned long long uint64_t;
+
+static __inline int FASTABS(int x)
+{
+	const int sign = x >> (sizeof(int) * 8 - 1);
+
+	x ^= sign;
+	x -= sign;
+
+	return x;
+}
+
+static __inline int CLZ(int x)
+{
+	int result;
+
+	__asm__ volatile (
+		"CLZ %[result], %[value]"
+		: [result] "=r" (result)
+		: [value] "r" (x)
+	);
+
+	return result;
+}
+
+static __inline int64_t MADD64(int64_t sum, int x, int y)
+{
+	uint32_t hi = (uint32_t)(sum >> 32);
+	uint32_t lo = (uint32_t)sum;
+
+	/* SMLAL{<c>}  <RdLo>, <RdHi>, <Rn>, <Rm> */
+	__asm__ volatile (
+		"SMLAL %[lo], %[hi], %[a], %[b]"
+		: [lo] "+r" (lo), [hi] "+r" (hi)
+		: [a] "r" (x), [b] "r" (y)
+	);
+
+	return (int64_t)(lo | ((uint64_t)hi << 32));
+}
+
+#if defined(__ARM_ARCH_7EM__)
+
+static __inline int MULSHIFT32(int x, int y)
+{
+	uint32_t result;
+
+	/* SMMUL{R}<c>  <Rd>, <Rn>, <Rm> */
+	__asm__ volatile (
+		"SMMUL %[result], %[a], %[b]"
+		: [result] "=r" (result)
+		: [a] "r" (x), [b] "r" (y)
+	);
+
+	return (int)result;
+}
+
+static __inline int MADD32(int sum, int x, int y)
+{
+	uint32_t result;
+
+	/* SMMLA{R}{<c>}{<q>}  <Rd>, <Rn>, <Rm>, <Ra> */
+	__asm__ volatile (
+		"SMMLA %[result], %[a], %[b], %[acc]"
+		: [result] "=r" (result)
+		: [a] "r" (x), [b] "r" (y), [acc] "r" (sum)
+	);
+
+	return (int)result;
+}
+
+static __inline int MSUB32(int sum, int x, int y)
+{
+	return (sum - MULSHIFT32(x, y));
+}
+
+#else
+
+static __inline int MULSHIFT32(int x, int y)
+{
+	uint32_t hi;
+	uint32_t lo;
+
+	/* SMULL{<c>}{<q>}  <RdLo>, <RdHi>, <Rn>, <Rm> */
+	__asm__ volatile (
+		"SMULL %[lo], %[hi], %[a], %[b]"
+		: [lo] "=r" (lo), [hi] "=r" (hi)
+		: [a] "r" (x), [b] "r" (y)
+	);
+
+	return (int)hi;
+}
+
+static __inline int MADD32(int sum, int x, int y)
+{
+	return (sum + MULSHIFT32(x, y));
+}
+
+static __inline int MSUB32(int sum, int x, int y)
+{
+	return (sum - MULSHIFT32(x, y));
+}
+
+#endif
+
+static __inline int64_t SAR64(int64_t x, int n)
+{
+	return (x >> n);
+}
+
+#else
+
+/* 64-bit signed integer */
 typedef long long int64_t;
 
 static __inline int FASTABS(int x)
 {
-	return((x > 0) ? x : -(x));
+	return ((x > 0) ? x : -(x));
 }
 
 #if 0
@@ -92,22 +214,34 @@ static __inline int CLZ(int x)
 	return numZeros;
 }
 
+static __inline int MADD32(int sum, int x, int y)
+{
+	const int64_t tmp = (int64_t)x * (int64_t)y;
+	return (sum + (int)(tmp >> 32));
+}
+
+static __inline int MSUB32(int sum, int x, int y)
+{
+	const int64_t tmp = (int64_t)x * (int64_t)y;
+	return (sum - (int)(tmp >> 32));
+}
+
+static __inline int64_t MADD64(int64_t sum, int x, int y)
+{
+	return (sum + (int64_t)x * (int64_t)y);
+}
+
+static __inline int MULSHIFT32(int x, int y)
+{
+	const int64_t tmp = (int64_t)x * (int64_t)y;
+	return (tmp >> 32);
+}
+
 static __inline int64_t SAR64(int64_t x, int n)
 {
 	return (x >> n);
 }
 
-static __inline int MULSHIFT32(int x, int y)
-{
-	int64_t tmp;
-
-	tmp = ((int64_t)x * (int64_t)y);
-	return (tmp>>32);
-}
-
-static __inline int64_t MADD64(int64_t sum64, int x, int y)
-{
-	return (sum64 + (int64_t)x * (int64_t)y);
-}
+#endif
 
 #endif /* _ASSEMBLY_H */

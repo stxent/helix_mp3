@@ -80,36 +80,36 @@ static void AntiAlias(int *x, int nBfly)
 		x += 18;
 
 		a0 = x[-1];			c0 = *c;	c++;	b0 = x[0];		c1 = *c;	c++;
-		x[-1] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;
-		x[0] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-1] = MSUB32(MULSHIFT32(c0, a0), c1, b0) << 1;
+		x[0] =  MADD32(MULSHIFT32(c0, b0), c1, a0) << 1;
 
 		a0 = x[-2];			c0 = *c;	c++;	b0 = x[1];		c1 = *c;	c++;
-		x[-2] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;
-		x[1] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-2] = MSUB32(MULSHIFT32(c0, a0), c1, b0) << 1;
+		x[1] =  MADD32(MULSHIFT32(c0, b0), c1, a0) << 1;
 
 		a0 = x[-3];			c0 = *c;	c++;	b0 = x[2];		c1 = *c;	c++;
-		x[-3] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;
-		x[2] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-3] = MSUB32(MULSHIFT32(c0, a0), c1, b0) << 1;
+		x[2] =  MADD32(MULSHIFT32(c0, b0), c1, a0) << 1;
 
 		a0 = x[-4];			c0 = *c;	c++;	b0 = x[3];		c1 = *c;	c++;
-		x[-4] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;
-		x[3] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-4] = MSUB32(MULSHIFT32(c0, a0), c1, b0) << 1;
+		x[3] =  MADD32(MULSHIFT32(c0, b0), c1, a0) << 1;
 
 		a0 = x[-5];			c0 = *c;	c++;	b0 = x[4];		c1 = *c;	c++;
-		x[-5] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;
-		x[4] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-5] = MSUB32(MULSHIFT32(c0, a0), c1, b0) << 1;
+		x[4] =  MADD32(MULSHIFT32(c0, b0), c1, a0) << 1;
 
 		a0 = x[-6];			c0 = *c;	c++;	b0 = x[5];		c1 = *c;	c++;
-		x[-6] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;
-		x[5] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-6] = MSUB32(MULSHIFT32(c0, a0), c1, b0) << 1;
+		x[5] =  MADD32(MULSHIFT32(c0, b0), c1, a0) << 1;
 
 		a0 = x[-7];			c0 = *c;	c++;	b0 = x[6];		c1 = *c;	c++;
-		x[-7] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;
-		x[6] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-7] = MSUB32(MULSHIFT32(c0, a0), c1, b0) << 1;
+		x[6] =  MADD32(MULSHIFT32(c0, b0), c1, a0) << 1;
 
 		a0 = x[-8];			c0 = *c;	c++;	b0 = x[7];		c1 = *c;	c++;
-		x[-8] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;
-		x[7] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-8] = MSUB32(MULSHIFT32(c0, a0), c1, b0) << 1;
+		x[7] =  MADD32(MULSHIFT32(c0, b0), c1, a0) << 1;
 	}
 }
 
@@ -139,12 +139,12 @@ static void WinPrevious(int *xPrev, int *xPrevWin, int btPrev)
 	if (btPrev == 2) {
 		/* this could be reordered for minimum loads/stores */
 		wpLo = imdctWin[btPrev];
-		xPrevWin[ 0] = MULSHIFT32(wpLo[ 6], xPrev[2]) + MULSHIFT32(wpLo[0], xPrev[6]);
-		xPrevWin[ 1] = MULSHIFT32(wpLo[ 7], xPrev[1]) + MULSHIFT32(wpLo[1], xPrev[7]);
-		xPrevWin[ 2] = MULSHIFT32(wpLo[ 8], xPrev[0]) + MULSHIFT32(wpLo[2], xPrev[8]);
-		xPrevWin[ 3] = MULSHIFT32(wpLo[ 9], xPrev[0]) + MULSHIFT32(wpLo[3], xPrev[8]);
-		xPrevWin[ 4] = MULSHIFT32(wpLo[10], xPrev[1]) + MULSHIFT32(wpLo[4], xPrev[7]);
-		xPrevWin[ 5] = MULSHIFT32(wpLo[11], xPrev[2]) + MULSHIFT32(wpLo[5], xPrev[6]);
+		xPrevWin[ 0] = MADD32(MULSHIFT32(wpLo[ 6], xPrev[2]), wpLo[0], xPrev[6]);
+		xPrevWin[ 1] = MADD32(MULSHIFT32(wpLo[ 7], xPrev[1]), wpLo[1], xPrev[7]);
+		xPrevWin[ 2] = MADD32(MULSHIFT32(wpLo[ 8], xPrev[0]), wpLo[2], xPrev[8]);
+		xPrevWin[ 3] = MADD32(MULSHIFT32(wpLo[ 9], xPrev[0]), wpLo[3], xPrev[8]);
+		xPrevWin[ 4] = MADD32(MULSHIFT32(wpLo[10], xPrev[1]), wpLo[4], xPrev[7]);
+		xPrevWin[ 5] = MADD32(MULSHIFT32(wpLo[11], xPrev[2]), wpLo[5], xPrev[6]);
 		xPrevWin[ 6] = MULSHIFT32(wpLo[ 6], xPrev[5]);
 		xPrevWin[ 7] = MULSHIFT32(wpLo[ 7], xPrev[4]);
 		xPrevWin[ 8] = MULSHIFT32(wpLo[ 8], xPrev[3]);
@@ -447,8 +447,8 @@ static int IMDCT36(int *xCurr, int *xPrev, int *y, int btCurr, int btPrev, int b
 			d = xe - xo;
 			(*xPrev++) = xe + xo;	/* symmetry - xPrev[i] = xPrev[17-i] for long blocks */
 
-			yLo = (xPrevWin[i]    + MULSHIFT32(d, wp[i])) << 2;
-			yHi = (xPrevWin[17-i] + MULSHIFT32(d, wp[17-i])) << 2;
+			yLo = MADD32(xPrevWin[i], d, wp[i]) << 2;
+			yHi = MADD32(xPrevWin[17-i], d, wp[17-i]) << 2;
 			y[(i)*NBANDS]    = yLo;
 			y[(17-i)*NBANDS] = yHi;
 			mOut |= FASTABS(yLo);
@@ -569,9 +569,9 @@ static int IMDCT12x3(int *xCurr, int *xPrev, int *y, int btPrev, int blockIdx, i
 		mOut |= FASTABS(yLo);	y[( 0+i)*NBANDS] = yLo;
 		yLo = (xPrevWin[ 3+i] << 2);
 		mOut |= FASTABS(yLo);	y[( 3+i)*NBANDS] = yLo;
-		yLo = (xPrevWin[ 6+i] << 2) + (MULSHIFT32(wp[0+i], xBuf[3+i]));
+		yLo = MADD32((xPrevWin[ 6+i] << 2), wp[0+i], xBuf[3+i]);
 		mOut |= FASTABS(yLo);	y[( 6+i)*NBANDS] = yLo;
-		yLo = (xPrevWin[ 9+i] << 2) + (MULSHIFT32(wp[3+i], xBuf[5-i]));
+		yLo = MADD32((xPrevWin[ 9+i] << 2), wp[3+i], xBuf[5-i]);
 		mOut |= FASTABS(yLo);	y[( 9+i)*NBANDS] = yLo;
 		yLo = (xPrevWin[12+i] << 2) + (MULSHIFT32(wp[6+i], xBuf[2-i]) + MULSHIFT32(wp[0+i], xBuf[(6+3)+i]));
 		mOut |= FASTABS(yLo);	y[(12+i)*NBANDS] = yLo;
