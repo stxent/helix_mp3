@@ -8,15 +8,16 @@ option(HELIX_MP3_LTO "Enable Link Time Optimization." OFF)
 option(HELIX_MP3_STATIC "Enable static buffers for a decoder." OFF)
 
 # Default compiler flags
-set(FLAGS_DEFAULT "-fdata-sections -ffunction-sections -Wall -Wextra -Wshadow -pedantic")
-set(CMAKE_C_STANDARD 11)
+
+set(FLAGS_DEFAULT "-fdata-sections -ffunction-sections")
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS_DEFAULT} ${FLAGS_CPU}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} ${FLAGS_DEFAULT} ${FLAGS_CPU}")
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
 
 if(HELIX_MP3_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_C_COMPILE_OPTIONS_IPO -flto -ffat-lto-objects)
     endif()
 endif()
