@@ -1,8 +1,8 @@
-project(helix_mp3 C)
 cmake_minimum_required(VERSION 3.13)
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0069 NEW)
 cmake_policy(SET CMP0079 NEW)
+project(helix_mp3 C)
 
 option(HELIX_MP3_LTO "Enable Link Time Optimization." OFF)
 option(HELIX_MP3_STATIC "Enable static buffers for a decoder." OFF)
