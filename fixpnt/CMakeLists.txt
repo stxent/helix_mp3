@@ -19,6 +19,7 @@ list(APPEND SOURCE_FILES "real/trigtabs.c")
 # Create object library
 
 add_library(helix_mp3_fixpnt OBJECT ${SOURCE_FILES})
+target_compile_options(helix_mp3_fixpnt PRIVATE SHELL:${HELIX_MP3_C_FLAGS})
 target_include_directories(helix_mp3_fixpnt PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/real")
 target_include_directories(helix_mp3_fixpnt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/pub")
 

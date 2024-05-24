@@ -3,6 +3,7 @@ project(helix_mp3 C)
 
 option(HELIX_MP3_LTO "Enable Link Time Optimization." OFF)
 option(HELIX_MP3_STATIC "Enable static buffers for a decoder." OFF)
+set(HELIX_MP3_C_FLAGS "" CACHE STRING "Platform dependent flags for C language used when building for all configurations.")
 
 # Default compiler flags
 
